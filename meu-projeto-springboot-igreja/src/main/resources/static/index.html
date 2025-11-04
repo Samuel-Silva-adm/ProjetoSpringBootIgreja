@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Pessoas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Azul claro */
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1e90ff; /* Azul */
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        form {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #1e90ff;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #4682b4;
+        }
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse; /* colapsa bordas para aparência uniforme */
+            table-layout: fixed; /* colunas com largura definida para alinhamento consistente */
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px 18px; /* padding horizontal uniforme */
+            text-align: left;
+            border: 1px solid #ddd;
+            color: black; /* Garantindo que o texto na tabela fique visível */
+            word-break: break-word; /* permite quebra dentro de palavras longas */
+            overflow-wrap: break-word; /* quebra palavras longas */
+            white-space: normal; /* permite quebra de linha dentro das células */
+            box-sizing: border-box; /* garante que o padding esteja dentro da célula */
+            vertical-align: middle; /* deixa o conteúdo no meio verticalmente */
+        }
+        /* Centraliza conteúdo nas colunas (exceto ID) para ficar 'no meio' visualmente */
+        th, td { text-align: center; }
+        th:first-child, td:first-child { text-align: left; } /* ID fica alinhado à esquerda */
+        th, td { padding-left: 24px; padding-right: 24px; } /* padding mais generoso nas laterais */
+        th:last-child, td:last-child { padding-right: 24px; } /* garante espaço na borda direita */
+        /* Larguras fixas (percentuais) para cada coluna, somando 100% */
+        th:nth-child(1), td:nth-child(1) { width: 6%; }
+        th:nth-child(2), td:nth-child(2) { width: 54%; }
+        th:nth-child(3), td:nth-child(3) { width: 26%; }
+        th:nth-child(4), td:nth-child(4) { width: 14%; }
+        #mensagem {
+            color: green;
+            text-align: center;
+            margin-top: 10px;
+        }
+        /* Nova área de busca */
+        #area-busca {
+            width: 350px;
+            margin: 0 auto 10px auto;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        #area-busca input[type="text"] {
+            flex: 1;
+            margin: 0;
+        }
+        .btn-small {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        /* Estilo quando não há resultados */
+        .tabela-vazia {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cadastro de Pessoas</h1>
+    </header>
+
+    <form id="cadastroForm">
+        <input type="text" id="nome-cadastro" placeholder="Nome" required>
+        <input type="text" id="tipo-oportunidade" placeholder="Tipo de Oportunidade" required>
+        <input type="date" id="data-culto" required>
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <div id="mensagem"></div>
+
+    <!-- Área de busca: campo + botões -->
+    <div id="area-busca">
+        <input type="text" id="nome-busca" placeholder="Buscar por nome">
+        <button id="btn-buscar" class="btn-small">Buscar</button>
+        <button id="btn-limpar" class="btn-small">Limpar</button>
+    </div>
+
+	<!-- Tabela que exibirá a lista de pessoas -->
+	<table id="tabela-pessoas">
+	  <thead>
+	    <tr>
+	      <th>ID</th>
+	      <th>Nome</th>
+	      <th>Tipo de Oportunidade</th>
+	      <th>Data Culto</th>
+	    </tr>
+	  </thead>
+	  <tbody>
+	    <!-- Linhas da tabela serão inseridas aqui -->
+	  </tbody>
+	</table>
+
+
+    <script>
+        // Adiciona o evento de submit no formulário
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Coleta os dados do formulário
+            let nome = document.getElementById('nome-cadastro').value;
+            let tipoOportunidade = document.getElementById('tipo-oportunidade').value;
+            let dataCulto = document.getElementById('data-culto').value;
+
+            // Cria um objeto com os dados para enviar para o backend
+            let pessoa = { nome, tipoOportunidade, dataCulto };
+
+            // Envia os dados para o backend
+            fetch('http://localhost:8080/api/pessoas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pessoa)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Erro na resposta do servidor');
+                return response.json();
+            })
+            .then(data => {
+                // Exibe a mensagem "Pessoa cadastrada!" ao usuário
+                document.getElementById('mensagem').textContent = "Pessoa cadastrada!";
+                // Limpa o formulário
+                document.getElementById('cadastroForm').reset();
+                listarPessoas(); // Atualiza a tabela após o cadastro
+            })
+            .catch(error => {
+                document.getElementById('mensagem').textContent = "Erro ao cadastrar pessoa!";
+                console.error(error);
+            });
+        });
+
+        // Função que lista todas as pessoas na tabela
+        function listarPessoas() {
+            fetch('http://localhost:8080/api/pessoas')
+                .then(response => response.json())
+                .then(data => {
+                    renderizarTabela(data);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar pessoas:', error);
+                });
+        }
+
+        // Função que busca pessoas por nome e renderiza apenas os resultados
+        function searchPessoas() {
+            let nomeBusca = document.getElementById('nome-busca').value.trim();
+            if (!nomeBusca) {
+                listarPessoas();
+                return;
+            }
+
+            // Chama o endpoint de busca por nome
+            fetch('http://localhost:8080/api/pessoas/buscar?nome=' + encodeURIComponent(nomeBusca))
+                .then(response => response.json())
+                .then(data => {
+                    renderizarTabela(data);
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar pessoas:', error);
+                });
+        }
+
+        // Renderiza a tabela a partir de um array de pessoas
+        function renderizarTabela(data) {
+            let tabela = document.querySelector('#tabela-pessoas tbody');
+            tabela.innerHTML = ''; // Limpa a tabela antes de adicionar novos dados
+
+            // Verifica se os dados retornados são um array
+            if (Array.isArray(data)) {
+                if (data.length === 0) {
+                    // Mostra uma linha informando que não há resultados
+                    let row = tabela.insertRow();
+                    let cell = row.insertCell(0);
+                    cell.colSpan = 4;
+                    cell.className = 'tabela-vazia';
+                    cell.innerText = 'Nenhum resultado encontrado';
+                    return;
+                }
+                data.forEach(pessoa => {
+                    let row = tabela.insertRow();
+                    row.insertCell(0).innerText = pessoa.id ?? '';
+                    row.insertCell(1).innerText = pessoa.nome ?? '';
+                    row.insertCell(2).innerText = pessoa.tipoOportunidade ?? '';
+                    row.insertCell(3).innerText = pessoa.dataCulto ?? '';
+                });
+            }
+        }
+
+        // Configura eventos dos botões de busca e limpar
+        document.getElementById('btn-buscar').addEventListener('click', function() {
+            searchPessoas();
+        });
+        document.getElementById('btn-limpar').addEventListener('click', function() {
+            document.getElementById('nome-busca').value = '';
+            listarPessoas();
+        });
+
+        // Permite pressionar Enter no campo de busca para executar a busca
+        document.getElementById('nome-busca').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchPessoas();
+            }
+        });
+
+        // Carrega as pessoas ao iniciar a página
+        listarPessoas();
+    </script>
+</body>
+</html>
