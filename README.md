@@ -40,7 +40,7 @@ Listar todos os membros cadastrados e ver as informações diretamente na tabela
 
 📷 **Interface do sistema**
 
-Aqui está a parte visual do projeto:
+Aqui está a parte visual do projeto: https://github.com/Samuel-Silva-adm/ProjetoSpringBootIgreja/blob/main/InterfaceVisualCadastro.png
 
 
 
